@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel | BCA STORE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="admin-panel.css" />
+  <link rel="stylesheet" href="admin-login.css" />
+  <style>
+    /* Real-Time Highlight for New Records */
+    .record-row-new {
+        animation: highlightRow 3s ease-out;
+    }
+    @keyframes highlightRow {
+        0% { background-color: rgba(16, 185, 129, 0.2); }
+        100% { background-color: transparent; }
+    }
+  </style>
+</head>
+<body>
+
+
+<div class="admin-login-gate" id="adminLoginGate">
+  <div class="saas-login-container">
+    <div class="saas-login-card">
+      <button class="adm-top-btn" onclick="toggleDarkMode()" title="Toggle Theme" style="position: absolute; top: 16px; right: 16px; border: none; background: transparent; font-size: 1.2rem; cursor: pointer; z-index: 10;">🌙</button>
+      <div class="saas-header">
+        <div class="saas-logo">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <h1 class="saas-title">Admin Access</h1>
+        <p class="saas-subtitle">Authenticate to manage BCA Study Hub</p>
+      </div>
+
+      <div id="loginError" class="saas-error hidden">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span id="errorText"></span>
+      </div>
+
+      <form onsubmit="event.preventDefault(); adminLogin();">
+        <div class="saas-form-group">
+          <label for="adminEmail" class="saas-label">Email Address</label>
+          <div class="saas-input-wrapper">
+            <input type="email" id="adminEmail" class="saas-input" placeholder="admin@bcastore.com" required>
+          </div>
+        </div>
+
+        <div class="saas-form-group">
+          <label for="adminPassword" class="saas-label">Password</label>
+          <div class="saas-input-wrapper">
+            <input type="password" id="adminPassword" class="saas-input" placeholder="••••••••" required>
+            <button type="button" onclick="togglePassView()" class="saas-pass-toggle" aria-label="Toggle password visibility">
+              <svg id="eye-open" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+              <svg id="eye-closed" class="hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="saas-options">
+          <label class="saas-checkbox-label">
+            <input type="checkbox" class="saas-checkbox">
+            Remember me
+          </label>
+        </div>
+
+        <button type="submit" id="loginBtn" class="saas-button">
+          <span id="btn-text">Sign In</span>
+          <div id="btnLoader" class="saas-loader"></div>
+        </button>
+      </form>
+
+      <div class="saas-footer">
+        Powered by <a href="Https://real-vishal.netlify.app" target="_blank" style="color: #fff; text-decoration: none; font-weight: 500;">VISHAL</a> &bull; Enterprise Secure
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ADMIN PANEL ==================== -->
+<div class="admin-panel adm-shell" id="adminPanel" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <aside class="adm-sidebar" id="admSidebar">
+    <div class="adm-sb-brand">
+      <span class="adm-sb-brand-icon">⚙️</span>
+      <div class="adm-sb-brand-text">
+        <span class="brand-bca">BCA</span> <span class="brand-accent">STORE</span>
+        <div class="adm-sb-brand-sub">Admin Console</div>
+      </div>
+    </div>
+    <button class="adm-sb-toggle" id="admSbToggle" onclick="toggleAdmSidebar()" title="Collapse">◀</button>
+    <div class="adm-sb-section">
+      <div class="adm-sb-section-title">Overview</div>
+      <button class="adm-sb-item active" onclick="switchAdminTab('dashboard')" id="tabDashboard"><span class="adm-sb-icon">📊</span><span class="adm-sb-label">Dashboard</span></button>
+      <div class="adm-sb-section-title" style="margin-top:12px;">Content</div>
+      <button class="adm-sb-item" onclick="switchAdminTab('add')" id="tabAdd"><span class="adm-sb-icon">➕</span><span class="adm-sb-label">Add Material</span></button>
+      <button class="adm-sb-item" onclick="switchAdminTab('manage')" id="tabManage"><span class="adm-sb-icon">📋</span><span class="adm-sb-label">Manage</span></button>
+      <button class="adm-sb-item" onclick="switchAdminTab('notifications')" id="tabNotifications"><span class="adm-sb-icon">📢</span><span class="adm-sb-label">Notifications</span></button>
+      <div class="adm-sb-section-title" style="margin-top:12px;">Insights</div>
+      <button class="adm-sb-item" onclick="switchAdminTab('inbox')" id="tabInbox"><span class="adm-sb-icon">📥</span><span class="adm-sb-label">Inbox</span><span class="adm-sb-badge" id="inboxBadge" style="display:none;">0</span></button>
+      <button class="adm-sb-item" onclick="switchAdminTab('visitors')" id="tabVisitors"><span class="adm-sb-icon">👥</span><span class="adm-sb-label">Visitors</span></button>
+      <button class="adm-sb-item" onclick="switchAdminTab('analytics')" id="tabAnalytics"><span class="adm-sb-icon">📈</span><span class="adm-sb-label">Analytics</span></button>
+      <button class="adm-sb-item" onclick="switchAdminTab('community')" id="tabCommunity"><span class="adm-sb-icon">🧑‍🤝‍🧑</span><span class="adm-sb-label">Community</span></button>
+      <button class="adm-sb-item" onclick="switchAdminTab('voting')" id="tabVoting"><span class="adm-sb-icon">🔥</span><span class="adm-sb-label">Voting Hub</span></button>
+      <button class="adm-sb-item" onclick="switchAdminTab('attendance')" id="tabAttendance"><span class="adm-sb-icon">📅</span><span class="adm-sb-label">Attendance</span></button>
+    </div>
+    <button class="adm-sb-logout" onclick="adminLogout()"><span class="adm-sb-icon">🚪</span><span class="adm-sb-label">Logout</span></button>
+  </aside>
+  <div class="adm-sidebar-overlay" id="admOverlay" onclick="closeAdmSidebar()"></div>
+
+  <!-- MAIN AREA -->
+  <div class="adm-main">
+    <!-- TOP BAR -->
+    <div class="adm-topbar">
+      <button class="adm-mobile-toggle" id="admMobileToggle" onclick="toggleAdmSidebar()">⋮</button>
+      <div class="adm-search">
+        <span class="adm-search-icon">🔍</span>
+        <input type="text" id="admGlobalSearch" placeholder="Search anything..." />
+      </div>
+      <div class="adm-topbar-actions">
+        <!-- Global Live Session Indicator -->
+        <div id="globalLiveIndicator" class="hidden items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full cursor-pointer hover:bg-emerald-500/20 transition-all mr-4" onclick="switchAdminTab('attendance')">
+          <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+          <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Live Session</span>
+          <span id="globalTimer" class="text-xs font-mono text-emerald-400 font-bold ml-1">00:00</span>
+        </div>
+        <button class="adm-top-btn" id="darkToggle" title="Toggle Theme" style="font-size: 1rem;">🌙</button>
+        <button class="adm-top-btn" title="Notifications">🔔<span class="adm-top-badge"></span></button>
+        <div class="adm-topbar-divider"></div>
+        <div class="adm-top-profile" onclick="adminLogout()">
+          <div class="adm-top-avatar">A</div>
+          <span class="adm-top-name">Admin</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="adm-content">
+
+      <!-- ====== DASHBOARD ====== -->
+      <div class="adm-section active" id="admin-tab-dashboard">
+        <div class="adm-welcome">
+          <h2>Overview</h2>
+          <p>Real-time status of your academic ecosystem.</p>
+        </div>
+
+        <div class="adm-quick-actions">
+          <button class="adm-quick-btn" onclick="switchAdminTab('attendance')">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            Create Session
+          </button>
+          <button class="adm-quick-btn" onclick="switchAdminTab('add')">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            Add Material
+          </button>
+          <button class="adm-quick-btn" onclick="exportAttendance('pdf')">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Generate Report
+          </button>
+          <button class="adm-quick-btn" onclick="switchAdminTab('voting')">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.99 7.99 0 0120 13a7.98 7.98 0 01-2.343 5.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14l-2.828 2.828z"></path></svg>
+            Generate Vote
+          </button>
+        </div>
+
+        <div class="adm-stats-grid">
+          <div class="adm-stat-card">
+            <div class="adm-stat-label">Total Enrolled Students</div>
+            <div class="adm-stat-value" id="dashTotalEnrolled">2,840</div>
+            <div class="adm-stat-change up">↑ 12% from last month</div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-label">Active Sessions</div>
+            <div class="adm-stat-value">3</div>
+            <div class="adm-stat-change up"><span class="pulse-indicator"></span> Live Now</div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-label">Average Attendance</div>
+            <div class="adm-stat-value">84.2%</div>
+            <div class="adm-stat-change neutral">Steady</div>
+          </div>
+          <div class="adm-stat-card">
+            <div class="adm-stat-label">System Health</div>
+            <div class="adm-stat-value">100%</div>
+            <div class="adm-stat-change up">All Systems Operational</div>
+          </div>
+        </div>
+
+        <div class="responsive-grid-2-1">
+          <!-- Chart -->
+          <div class="glass-card">
+            <h3 style="font-size: 1rem; font-weight: 500; margin-bottom: 24px; color: var(--text-primary);">Weekly Performance</h3>
+            <div style="height: 200px; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px;">
+              <div style="flex: 1; background: var(--border-subtle); height: 40%; border-radius: var(--radius-sm); transition: var(--transition-fast);" onmouseover="this.style.background='var(--accent-blue)'" onmouseout="this.style.background='var(--border-subtle)'"></div>
+              <div style="flex: 1; background: var(--border-subtle); height: 60%; border-radius: var(--radius-sm); transition: var(--transition-fast);" onmouseover="this.style.background='var(--accent-blue)'" onmouseout="this.style.background='var(--border-subtle)'"></div>
+              <div style="flex: 1; background: var(--border-subtle); height: 50%; border-radius: var(--radius-sm); transition: var(--transition-fast);" onmouseover="this.style.background='var(--accent-blue)'" onmouseout="this.style.background='var(--border-subtle)'"></div>
+              <div style="flex: 1; background: var(--border-subtle); height: 80%; border-radius: var(--radius-sm); transition: var(--transition-fast);" onmouseover="this.style.background='var(--accent-blue)'" onmouseout="this.style.background='var(--border-subtle)'"></div>
+              <div style="flex: 1; background: var(--border-subtle); height: 75%; border-radius: var(--radius-sm); transition: var(--transition-fast);" onmouseover="this.style.background='var(--accent-blue)'" onmouseout="this.style.background='var(--border-subtle)'"></div>
+              <div style="flex: 1; background: var(--border-subtle); height: 90%; border-radius: var(--radius-sm); transition: var(--transition-fast);" onmouseover="this.style.background='var(--accent-blue)'" onmouseout="this.style.background='var(--border-subtle)'"></div>
+              <div style="flex: 1; background: var(--border-subtle); height: 65%; border-radius: var(--radius-sm); transition: var(--transition-fast);" onmouseover="this.style.background='var(--accent-blue)'" onmouseout="this.style.background='var(--border-subtle)'"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.75rem; color: var(--text-muted);">
+              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+            </div>
+          </div>
+
+          <!-- Activity -->
+          <div class="glass-card">
+            <h3 style="font-size: 1rem; font-weight: 500; margin-bottom: 24px; color: var(--text-primary);">Activity Log</h3>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-blue);"></div>
+                <div style="flex: 1; font-size: 0.85rem; color: var(--text-secondary);">Session created by <span style="color: var(--text-primary);">Dr. R.K. Singh</span></div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">2m ago</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green);"></div>
+                <div style="flex: 1; font-size: 0.85rem; color: var(--text-secondary);">System Backup <span style="color: var(--text-primary);">Completed</span></div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">1h ago</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-red);"></div>
+                <div style="flex: 1; font-size: 0.85rem; color: var(--text-secondary);">Failed login attempt</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">3h ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== ADD MATERIAL TAB ====== -->
+      <div class="adm-section" id="admin-tab-add">
+    <div class="admin-form-card glass-card">
+      <h3>➕ Add New Study Material</h3>
+      <div class="admin-form-grid">
+        <div class="form-group">
+          <label>Semester <span class="required">*</span></label>
+          <select id="addSemester" onchange="updateSubjectDropdown('addSemester','addSubject')">
+            <option value="">— Select Semester —</option>
+            <option value="Semester1">Semester 1</option>
+            <option value="Semester2">Semester 2</option>
+            <option value="Semester3">Semester 3</option>
+            <option value="Semester4">Semester 4</option>
+            <option value="Semester5">Semester 5</option>
+            <option value="Semester6">Semester 6</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Subject <span class="required">*</span></label>
+          <select id="addSubject">
+            <option value="">— Select Subject —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Material Type <span class="required">*</span></label>
+          <select id="addType" onchange="handleAdminLinkInput()">
+            <option value="">— Select Type —</option>
+            <option value="notes">📝 Notes</option>
+            <option value="pyq">📄 PYQs</option>
+            <option value="video">🎥 Video Lecture</option>
+            <option value="pyq_solve">📜 PYQs Solve</option>
+            <option value="program">⌨️ Program</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Title <span class="required">*</span></label>
+          <input type="text" id="addTitle" placeholder="e.g. Unit 1 - Introduction to C" />
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Description</label>
+          <textarea id="addDescription" placeholder="Brief description of this material..." rows="3"></textarea>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Link (PDF / YouTube / Drive) <span class="required">*</span></label>
+          <input type="url" id="addLink" placeholder="https://..." />
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="addMaterial()">✅ Add Material</button>
+        <button class="btn-outline" onclick="clearAddForm()">🔄 Clear Form</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== NOTIFICATIONS TAB ====== -->
+  <div class="adm-section" id="admin-tab-notifications">
+    <div class="admin-notif-layout">
+      <!-- Add Notification Form -->
+      <div class="admin-form-card glass-card">
+        <h3>📢 Post New Notification</h3>
+        <div class="form-group" style="margin-top:16px;">
+          <label>Title <span class="required">*</span></label>
+          <input type="text" id="notifTitle" placeholder="e.g. Exam Schedule Released" maxlength="80" />
+        </div>
+        <div class="form-group">
+          <label>Message <span class="required">*</span></label>
+          <textarea id="notifMessage" placeholder="Write your announcement here..." rows="4" maxlength="500"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="notifType">
+            <option value="info">🔵 Info / General</option>
+            <option value="update">🟢 Update / New Content</option>
+            <option value="exam">🟡 Exam / Schedule</option>
+            <option value="alert">🔴 Alert / Urgent</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex-direction:row; align-items:center; gap:12px;">
+          <input type="checkbox" id="notifPinned" style="width:18px;height:18px;cursor:pointer;" />
+          <label for="notifPinned" style="margin:0;cursor:pointer;">📌 Pin this notification (shows in ticker)</label>
+        </div>
+        <button class="btn-primary" onclick="addNotification()" style="margin-top:16px; width:100%;">📢 Post Notification</button>
+      </div>
+      <!-- Existing Notifications List -->
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h3>📋 All Notifications</h3>
+          <button class="btn-outline" style="color:var(--danger);" onclick="clearAllNotifications()">🗑️ Clear All</button>
+        </div>
+        <div id="adminNotifList">
+          <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+        <div class="empty-state" id="adminNotifEmpty" style="display:none;">
+          <div class="empty-icon">🔔</div>
+          <h3>No Notifications Yet</h3>
+          <p>Use the form to post your first announcement.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== MANAGE TAB ====== -->
+  <div class="adm-section" id="admin-tab-manage">
+    <div class="admin-filter-bar glass-card">
+      <div class="form-group" style="margin:0;flex:1;">
+        <select id="filterSem" onchange="loadManageMaterials()">
+          <option value="">All Semesters</option>
+          <option value="Semester1">Semester 1</option>
+          <option value="Semester2">Semester 2</option>
+          <option value="Semester3">Semester 3</option>
+          <option value="Semester4">Semester 4</option>
+          <option value="Semester5">Semester 5</option>
+          <option value="Semester6">Semester 6</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;flex:1;">
+        <select id="filterType" onchange="loadManageMaterials()">
+          <option value="">All Types</option>
+          <option value="notes">Notes</option>
+          <option value="pyq">PYQs</option>
+          <option value="video">Videos</option>
+          <option value="lab">Lab</option>
+          <option value="program">Programs</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;flex:2;">
+        <input type="text" id="manageSearch" placeholder="Search materials..." oninput="loadManageMaterials()" />
+      </div>
+    </div>
+    <div id="manageMaterialsList" style="margin-top:16px;"></div>
+    <div class="empty-state" id="manageEmpty" style="display:none;">
+      <div class="empty-icon">📭</div>
+      <h3>No Materials Found</h3>
+      <p>Add materials using the "Add Material" tab.</p>
+    </div>
+  </div>
+
+  <!-- ====== INBOX TAB ====== -->
+  <div class="adm-section" id="admin-tab-inbox">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+      <h3>📥 User Suggestions & Feedback</h3>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-outline" onclick="markAllRead()">✅ Mark All Read</button>
+        <button class="btn-outline" style="color:var(--danger);" onclick="clearAllSuggestions()">🗑️ Clear All</button>
+      </div>
+    </div>
+    <div id="suggestionList"></div>
+    <div class="empty-state" id="inboxEmpty" style="display:none;">
+      <div class="empty-icon">📭</div>
+      <h3>Inbox is Empty</h3>
+      <p>No suggestions received yet.</p>
+    </div>
+  </div>
+
+  <!-- ====== VISITORS TAB ====== -->
+  <div class="adm-section" id="admin-tab-visitors">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+      <h3>👥 Platform Visitors</h3>
+      <div style="display:flex;gap:8px;">
+        <span class="badge-cat-general" style="padding:4px 12px; border-radius:99px; font-size:0.8rem; font-weight:700;">
+          Total Unique: <span id="totalUniqueVisitors">0</span>
+        </span>
+      </div>
+    </div>
+    <div id="visitorsList"></div>
+    <div class="empty-state" id="visitorsEmpty" style="display:none;">
+      <div class="empty-icon">👥</div>
+      <h3>No Visitors Yet</h3>
+      <p>Visitor data will appear here once users enter their names.</p>
+    </div>
+  </div>
+
+  <!-- ====== ANALYTICS TAB ====== -->
+  <div class="adm-section" id="admin-tab-analytics">
+    <div class="analytics-grid">
+      <div class="analytics-card glass-card">
+        <div class="analytics-icon">📚</div>
+        <div class="analytics-value" id="totalMaterials">—</div>
+        <div class="analytics-label">Total Materials</div>
+      </div>
+      <div class="analytics-card glass-card">
+        <div class="analytics-icon">📝</div>
+        <div class="analytics-value" id="totalNotes">—</div>
+        <div class="analytics-label">Notes</div>
+      </div>
+      <div class="analytics-card glass-card">
+        <div class="analytics-icon">🎥</div>
+        <div class="analytics-value" id="totalVideos">—</div>
+        <div class="analytics-label">Videos</div>
+      </div>
+      <div class="analytics-card glass-card">
+        <div class="analytics-icon">📄</div>
+        <div class="analytics-value" id="totalPYQs">—</div>
+        <div class="analytics-label">PYQs</div>
+      </div>
+      <div class="analytics-card glass-card">
+        <div class="analytics-icon">💬</div>
+        <div class="analytics-value" id="totalSuggestions">—</div>
+        <div class="analytics-label">Suggestions</div>
+      </div>
+      <div class="analytics-card glass-card">
+        <div class="analytics-icon">⚡</div>
+        <div class="analytics-value" id="totalInteractions">0</div>
+        <div class="analytics-label">Total Interactions</div>
+      </div>
+      <div class="analytics-card glass-card">
+        <div class="analytics-icon">🎓</div>
+        <div class="analytics-value" id="totalEnrolled">0</div>
+        <div class="analytics-label">Total Enrolled</div>
+      </div>
+      <div class="analytics-card glass-card trending">
+        <div class="analytics-icon">🔥</div>
+        <div class="analytics-value" id="topSemester">N/A</div>
+        <div class="analytics-label">Top Semester</div>
+      </div>
+    </div>
+    <div class="glass-card" style="margin-top:24px; padding:24px;">
+      <h4 style="margin-bottom:20px; display:flex; align-items:center; gap:8px;">📊 Semester Popularity & Materials</h4>
+      <div id="semesterBreakdown"></div>
+    </div>
+  </div>
+
+  <!-- ====== COMMUNITY ADMIN TAB ====== -->
+  <div class="adm-section" id="admin-tab-community">
+    <div class="comm-admin-stats">
+      <div class="comm-admin-stat glass-card"><div class="val" id="commAdminUserCount">0</div><div class="lbl">Users</div></div>
+      <div class="comm-admin-stat glass-card"><div class="val" id="commAdminDoubtCount">0</div><div class="lbl">Doubts</div></div>
+      <div class="comm-admin-stat glass-card"><div class="val" id="commAdminChatCount">0</div><div class="lbl">Messages</div></div>
+      <div class="comm-admin-stat glass-card"><div class="val" id="commAdminOnlineCount">0</div><div class="lbl">Online</div></div>
+    </div>
+
+    <!-- Post Announcement -->
+    <div class="admin-form-card glass-card" style="margin-bottom:24px;">
+      <h3>📢 Post Community Announcement</h3>
+      <div class="form-group" style="margin-top:14px;"><label>Title *</label><input type="text" id="commAdminAnnTitle" placeholder="Announcement title..." /></div>
+      <div class="form-group"><label>Message *</label><textarea id="commAdminAnnMsg" rows="3" placeholder="Write the announcement..."></textarea></div>
+      <div class="form-group"><label>Type</label>
+        <select id="commAdminAnnType"><option value="info">🔵 Info</option><option value="update">🟢 Update</option><option value="exam">🟡 Exam</option><option value="alert">🔴 Alert</option></select>
+      </div>
+      <button class="btn-primary" onclick="commAdminPostAnnouncement()" style="margin-top:12px;">📢 Post Announcement</button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="glass-card" style="margin-bottom:24px;padding:20px;">
+      <h4 style="margin-bottom:14px;">👥 Registered Users</h4>
+      <div class="adm-table-container">
+        <div id="commAdminUsersTable"></div>
+      </div>
+    </div>
+
+    <!-- Doubts Management -->
+    <div class="glass-card" style="margin-bottom:24px;padding:20px;">
+      <h4 style="margin-bottom:14px;">🧠 Recent Doubts</h4>
+      <div id="commAdminDoubtsList"></div>
+    </div>
+
+    <!-- Chat Monitor -->
+    <div class="glass-card" style="padding:20px;">
+      <h4 style="margin-bottom:14px;">💬 Recent Chat Messages</h4>
+      <div class="adm-table-container">
+        <div id="commAdminChatList"></div>
+      </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== VOTING HUB ====== -->
+  <div class="adm-section" id="admin-tab-voting">
+    <div class="adm-welcome">
+      <h2>🔥 Voting Hub</h2>
+      <p>Create and manage community polls in real-time.</p>
+    </div>
+
+    <div class="responsive-grid-2-1">
+      <!-- Create Poll -->
+      <div class="glass-card">
+        <h3 style="margin-bottom:20px; font-size:1.1rem; display:flex; align-items:center; gap:8px;">✨ Create New Poll <span class="badge-live">Live</span></h3>
+        <div class="form-group">
+          <label>Poll Title *</label>
+          <input type="text" id="pollTitle" placeholder="e.g. Best Teacher of the Month" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="pollDesc" rows="2" placeholder="Tell students what this poll is about..."></textarea>
+        </div>
+        <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="pollCategory">
+              <option value="General">✨ General</option>
+              <option value="Study">📚 Study</option>
+              <option value="Teacher">👨‍🏫 Teacher</option>
+              <option value="Event">🎉 Event</option>
+              <option value="Fun">🎮 Fun</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Duration (Minutes) *</label>
+            <input type="number" id="pollDuration" value="60" min="1" />
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <label style="margin-bottom:0;">Poll Options *</label>
+            <button type="button" onclick="addPollOptionField()" class="btn-primary" style="padding:4px 12px; font-size:0.75rem; border-radius:6px; background:var(--accent-blue-bg); color:var(--accent-blue); border:1px solid var(--accent-blue-bg);">+ Add Option</button>
+          </div>
+          <div id="pollOptionsContainer" style="display:flex; flex-direction:column; gap:10px;">
+            <div class="poll-opt-field" style="display:flex; gap:8px;">
+              <input type="text" class="poll-opt-input" placeholder="Option 1" style="flex:1;" />
+              <button type="button" class="btn-outline" style="padding:0 12px; opacity:0; pointer-events:none;">×</button>
+            </div>
+            <div class="poll-opt-field" style="display:flex; gap:8px;">
+              <input type="text" class="poll-opt-input" placeholder="Option 2" style="flex:1;" />
+              <button type="button" class="btn-outline" style="padding:0 12px; opacity:0; pointer-events:none;">×</button>
+            </div>
+          </div>
+        </div>
+        
+        <button class="btn-primary" onclick="adminCreatePoll()" style="margin-top:12px; width:100%; display:flex; align-items:center; justify-content:center; gap:10px;">
+          <span>🚀 Launch Poll Instantly</span>
+          <div id="pollLoader" class="saas-loader" style="width:14px; height:14px; border-width:2px; border-top-color:#fff;"></div>
+        </button>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="glass-card">
+        <h3 style="margin-bottom:20px; font-size:1.1rem;">📊 Voting Insights</h3>
+        <div id="pollAdminStats">
+          <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
+            <span style="font-size:2rem; display:block; margin-bottom:10px;">📉</span>
+            No data available
+          </div>
+        </div>
+        
+        <div style="margin-top:24px; padding:16px; background:var(--bg-surface-hover); border-radius:12px; border:1px dashed var(--border-subtle);">
+          <h4 style="font-size:0.8rem; margin-bottom:8px; color:var(--text-secondary);">Pro Tip 💡</h4>
+          <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Active polls are visible to all registered community members in real-time. Use clear titles and engaging options to increase participation.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card" style="margin-top:24px;">
+      <h3 style="margin-bottom:20px; font-size:1.1rem;">📋 Manage All Polls</h3>
+      <div id="adminPollsList">
+          <!-- Rendered by JS -->
+          <p style="color:var(--text-muted); padding:20px;">Loading polls...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== ATTENDANCE MANAGEMENT TAB ====== -->
+  <div class="adm-section" id="admin-tab-attendance">
+    <div class="attendance-header" style="margin-bottom: 32px;">
+      <h2>Live Attendance Hub</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Realtime session management and presence tracking.</p>
+    </div>
+
+    <div class="responsive-grid-att">
+      
+      <!-- LEFT COLUMN: Start Session -->
+      <div style="position: sticky; top: 100px; display: flex; flex-direction: column; gap: 24px;">
+          <div class="glass-card" style="padding: 28px;">
+            <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 24px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 12px;">Create Session</h3>
+            
+            <div class="form-group">
+              <label>Faculty Name</label>
+              <input type="text" id="attTeacherName" placeholder="e.g. Dr. R.K. Singh" style="background: rgba(0,0,0,0.03);" />
+            </div>
+            
+            <div class="form-group">
+              <label>Semester</label>
+              <select id="attSemester" onchange="updateAttendanceSubjectDropdown()" style="background: rgba(0,0,0,0.03);">
+                <option value="">— Select Semester —</option>
+                <option value="Semester1">Semester 1</option>
+                <option value="Semester2">Semester 2</option>
+                <option value="Semester3">Semester 3</option>
+                <option value="Semester4">Semester 4</option>
+                <option value="Semester5">Semester 5</option>
+                <option value="Semester6">Semester 6</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Subject</label>
+              <select id="attSubject" style="background: rgba(0,0,0,0.03);">
+                <option value="">— Select Subject —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Duration</label>
+              <select id="attDuration" style="background: rgba(0,0,0,0.03);">
+                <option value="5">5 Minutes</option>
+                <option value="10" selected>10 Minutes</option>
+                <option value="15">15 Minutes</option>
+                <option value="30">30 Minutes</option>
+                <option value="60">60 Minutes</option>
+              </select>
+            </div>
+
+            <button class="btn-primary" onclick="startAttendanceSession()" style="width: 100%; justify-content: center; margin-top: 10px; padding: 14px;">
+              <span id="btn-text">Generate Session</span>
+              <span id="attBtnLoader" class="spinner" style="display:none; width: 16px; height: 16px; border-width: 2px; margin-left: 8px; margin-bottom: 0;"></span>
+            </button>
+          </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Active Sessions, Feed, History -->
+      <div style="display: flex; flex-direction: column; gap: 32px;">
+        
+        <!-- Active Sessions Section -->
+        <div>
+            <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--success);">●</span> Active Sessions
+            </h3>
+            <div id="activeSessionsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                <!-- Realtime sessions injected here -->
+            </div>
+        </div>
+
+        <!-- Live Submissions Feed -->
+        <div id="attendanceFeedSection" class="glass-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="font-size: 1.1rem; font-weight: 800;">Live Submissions Feed</h3>
+                <span style="font-size: 0.8rem; color: var(--text-muted); background: var(--bg); padding: 4px 10px; border-radius: 99px;">Select a session 'Feed' to view</span>
+            </div>
+            
+            <div class="adm-table-container" style="max-height: 300px;">
+                <table class="adm-table" style="margin: 0; width: 100%;">
+                    <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
+                        <tr>
+                            <th>Student</th>
+                            <th>Roll</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceFeedTable">
+                    </tbody>
+                </table>
+                <div id="attendanceFeedEmpty" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                    Waiting for session feed selection...
+                </div>
+            </div>
+        </div>
+
+        <!-- Session History -->
+        <div class="glass-card" style="padding: 24px;">
+            <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 20px;">Session History</h3>
+            <div class="adm-table-container">
+                <table class="adm-table" style="margin: 0; width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Subject</th>
+                            <th>Teacher</th>
+                            <th>Sem</th>
+                            <th>Count</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceHistoryTable">
+                    </tbody>
+                </table>
+                <div id="attendanceHistoryEmpty" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                    No past sessions found.
+                </div>
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+    </div><!-- /adm-content -->
+  </div><!-- /adm-main -->
+</div><!-- /admin-panel -->
+
+<div class="admin-extras" id="adminExtras">
+ 
+<!-- ==================== VISIT COUNTER ==================== -->
+<section class="visit-counter-section">
+  <div class="container">
+    <div class="vc-card glass-card">
+      <div class="vc-icon">🌍</div>
+      <div class="vc-info">
+        <h3 id="totalVisits">0</h3>
+        <p>Global Students Visited</p>
+      </div>
+      <div class="vc-pulse" title="Live Counter Enabled"></div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- ==================== SUGGESTION MODAL ==================== -->
+<div class="modal-overlay" id="suggestionModal">
+  <div class="modal glass-card">
+    <div class="modal-header">
+      <div style="display:flex; gap:16px;">
+        <h3 class="sugg-tab active" id="tabSend" onclick="switchSuggTab('send')">💬 Send Suggestion</h3>
+        <h3 class="sugg-tab" id="tabHistory" onclick="switchSuggTab('history')">📜 My History</h3>
+      </div>
+      <button class="modal-close" onclick="closeSuggestionModal()">✕</button>
+    </div>
+    <div id="suggSendView">
+      <div class="modal-body" id="suggestionBody">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="suggName" placeholder="Enter your name..." />
+        </div>
+        <div class="form-group">
+          <label>Category <span class="required">*</span></label>
+          <select id="suggCategory">
+            <option value="General">✨ General Feedback</option>
+            <option value="Content Missing">📝 Content Missing</option>
+            <option value="Bug Report">🐛 Bug Report</option>
+            <option value="Feature Request">💡 Feature Request</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Your Message <span class="required">*</span></label>
+          <textarea id="suggMessage" placeholder="Describe your suggestion or feedback..." rows="4" maxlength="500" oninput="updateCharCount(this)"></textarea>
+          <div class="char-count" style="text-align:right; font-size:0.75rem; color:var(--text-muted); margin-top:4px;">
+            <span id="charCurrent">0</span>/500
+          </div>
+        </div>
+        <input type="hidden" id="suggContext" value="" />
+      </div>
+      <div class="modal-footer" id="suggestionFooter">
+        <button class="btn-outline" onclick="closeSuggestionModal()">Cancel</button>
+        <button class="btn-primary" onclick="submitSuggestion()">Send Suggestion ✈️</button>
+      </div>
+    </div>
+    <div id="suggHistoryView" style="display:none;">
+      <div class="modal-body" id="suggestionHistoryBody" style="max-height:400px; overflow-y:auto;">
+        <!-- Generated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" style="width:100%" onclick="closeSuggestionModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+ <!-- EDIT MATERIAL MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal glass-card" style="max-width:600px;">
+    <div class="modal-header">
+      <h3>✏️ Edit Material</h3>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId" />
+      <input type="hidden" id="editSemKey" />
+      <input type="hidden" id="editSubKey" />
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="editTitle" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="editDescription" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Link</label>
+        <input type="url" id="editLink" />
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="editType">
+          <option value="notes">Notes</option>
+          <option value="pyq">PYQs</option>
+          <option value="video">Video</option>
+          <option value="pyq_solve">PYQs Solve</option>
+          <option value="program">Program</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEditMaterial()">Save Changes ✅</button>
+    </div>
+  </div>
+</div>
+
+<!-- Poll Results Modal -->
+<div class="adm-modal" id="pollResultsModal">
+  <div class="adm-modal-card" style="max-width: 600px;">
+    <div class="adm-modal-header">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="adm-modal-icon">📊</div>
+        <div>
+          <h3 id="resPollTitle">Poll Results</h3>
+          <p id="resPollMeta" style="font-size:0.75rem; color:var(--text-secondary);"></p>
+        </div>
+      </div>
+      <button class="adm-modal-close" onclick="closeResModal()">×</button>
+    </div>
+    <div class="adm-modal-body">
+      <div id="resPollStats" style="margin-bottom:24px;"></div>
+      <h4 style="font-size:0.9rem; margin-bottom:12px; display:flex; align-items:center; gap:8px;">👥 Individual Votes <span id="resVoteCount" class="badge-live" style="animation:none; background:var(--bg-surface-hover); color:var(--text-secondary);">0</span></h4>
+      <div class="adm-table-container">
+        <table class="adm-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Roll No</th>
+              <th>Selection</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="resVotesTable">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="adm-modal-footer">
+      <button class="btn-outline" onclick="closeResModal()">Close</button>
+      <button class="btn-primary" onclick="exportPollResults()">📥 Export CSV</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .adm-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;
+  }
+  .adm-modal.show { display: flex; animation: saasFadeIn 0.3s ease; }
+  .adm-modal-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); width: 100%; box-shadow: var(--shadow-md); overflow: hidden; }
+  .adm-modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+  .adm-modal-icon { width: 40px; height: 40px; background: var(--bg-surface-hover); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+  .adm-modal-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; color: var(--text-primary); }
+  .adm-modal-close { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
+  .adm-modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
+  .adm-modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 12px; background: var(--bg-surface); }
+
+  .res-bar-item { margin-bottom: 16px; }
+  .res-bar-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; font-weight: 500; }
+  .res-bar-track { height: 8px; background: var(--bg-surface-hover); border-radius: 4px; overflow: hidden; position: relative; }
+  .res-bar-fill { height: 100%; background: var(--accent-blue); transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
+</style>
+
+</div><!-- /admin-extras -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="knowledge_data.js"></script>
+<script src="business_comm_data.js"></script>
+<script src="c_programming_data.js"></script>
+<script src="project_data.js"></script>
+<script src="ms_dos_data.js"></script>
+<script src="ms_office_data.js"></script>
+<script src="chat_data.js"></script>
+<script src="c_lab_data.js"></script>
+<script src="ds_data.js"></script>
+<script src="architecture_data.js"></script>
+<script src="html_data.js"></script>
+<script src="cpp_data.js"></script>
+<script src="script.js"></script>
+<link rel="stylesheet" href="community.css" />
+<script src="community.js"></script>
+<script src="attendance.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    initAdminPage();
+    // Initialize theme
+    if (typeof initDarkMode === 'function') initDarkMode();
+    else document.documentElement.setAttribute('data-theme', 'dark'); // Fallback
+    
+    // Check if we are logged in
+    const auth = lsGet('adminAuth');
+    if (!auth || auth.exp <= Date.now()) {
+      document.body.classList.add('login-active');
+      document.getElementById('adminExtras').style.setProperty('display', 'none', 'important');
+    } else {
+      document.body.classList.remove('login-active');
+      document.getElementById('adminExtras').style.display = 'block';
+    }
+    
+    initAdminLoginEffects();
+  });
+
+  function initAdminLoginEffects() {
+    // Typing Effect
+    const typingText = document.getElementById('typing-text-login');
+    if (typingText) {
+      const text = "Smart Study Platform for Future Developers";
+      let index = 0;
+      function type() {
+          if (index < text.length) {
+              typingText.textContent += text.charAt(index);
+              index++;
+              setTimeout(type, 50);
+          }
+      }
+      setTimeout(type, 1000);
+    }
+
+    // Canvas Particles
+    const canvas = document.getElementById('bg-canvas-login');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      function resize() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Particle {
+          constructor() { this.reset(); }
+          reset() {
+              this.x = Math.random() * canvas.width;
+              this.y = Math.random() * canvas.height;
+              this.size = Math.random() * 2 + 0.5;
+              this.speedX = Math.random() * 0.5 - 0.25;
+              this.speedY = Math.random() * 0.5 - 0.25;
+              this.opacity = Math.random() * 0.5 + 0.2;
+          }
+          update() {
+              this.x += this.speedX;
+              this.y += this.speedY;
+              if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+              if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+          }
+          draw() {
+              ctx.fillStyle = `rgba(14, 165, 233, ${this.opacity})`;
+              ctx.beginPath();
+              ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+              ctx.fill();
+          }
+      }
+      for (let i = 0; i < 80; i++) particles.push(new Particle());
+      function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.strokeStyle = 'rgba(14, 165, 233, 0.05)';
+          ctx.lineWidth = 0.5;
+          for (let i = 0; i < particles.length; i++) {
+              for (let j = i + 1; j < particles.length; j++) {
+                  const dx = particles[i].x - particles[j].x;
+                  const dy = particles[i].y - particles[j].y;
+                  const distance = Math.sqrt(dx * dx + dy * dy);
+                  if (distance < 150) {
+                      ctx.beginPath();
+                      ctx.moveTo(particles[i].x, particles[i].y);
+                      ctx.lineTo(particles[j].x, particles[j].y);
+                      ctx.stroke();
+                  }
+              }
+          }
+          particles.forEach(p => { p.update(); p.draw(); });
+          requestAnimationFrame(animate);
+      }
+      animate();
+    }
+  }
+</script>
+</body>
+</html>
